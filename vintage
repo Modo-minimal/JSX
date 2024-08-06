@@ -1,0 +1,74 @@
+// vintage.jsx
+// This script emulates the look of vintage film in Photoshop.
+
+if (app.documents.length > 0) {
+    var doc = app.activeDocument;
+
+    // Duplicate the background layer
+    var backgroundLayer = doc.backgroundLayer;
+    var vintageLayer = backgroundLayer.duplicate();
+    vintageLayer.name = "Vintage Layer";
+
+    // Apply a Color Balance adjustment
+    var colorBalanceLayer = doc.artLayers.add();
+    colorBalanceLayer.name = "Color Balance";
+    colorBalanceLayer.blendMode = BlendMode.COLOR;
+    colorBalanceLayer.opacity = 80;
+
+    var colorBalance = colorBalanceLayer.adjustmentLayer;
+    colorBalance.properties.setPropertyValue("presetKind", "custom");
+    colorBalance.properties.setPropertyValue("shadowLevels", [20, -20, -10]);
+    colorBalance.properties.setPropertyValue("midtoneLevels", [10, 0, -10]);
+    colorBalance.properties.setPropertyValue("highlightLevels", [-10, 10, 20]);
+
+    // Apply a Curves adjustment
+    var curvesLayer = doc.artLayers.add();
+    curvesLayer.name = "Curves";
+    curvesLayer.blendMode = BlendMode.NORMAL;
+    curvesLayer.opacity = 80;
+
+    var curves = curvesLayer.adjustmentLayer;
+    curves.properties.setPropertyValue("presetKind", "custom");
+    curves.properties.setPropertyValue("curve", [
+        [0, 0],
+        [64, 64],
+        [128, 140],
+        [192, 192],
+        [255, 255]
+    ]);
+
+    // Apply a Noise filter
+    var noiseLayer = vintageLayer.duplicate();
+    noiseLayer.name = "Noise Layer";
+    noiseLayer.applyNoise(3, NoiseDistribution.UNIFORM, true);
+
+    // Apply a Vignette effect
+    var vignetteLayer = doc.artLayers.add();
+    vignetteLayer.name = "Vignette";
+    vignetteLayer.blendMode = BlendMode.MULTIPLY;
+    vignetteLayer.opacity = 60;
+
+    var vignette = vignetteLayer.filterGallery;
+    vignette.applyFilter("lensCorrection", {
+        amount: -50,
+        midpoint: 50,
+        roundness: 0,
+        feather: 50,
+        exposure: 0
+    });
+
+    // Group the layers
+    var layerSet = doc.layerSets.add();
+    layerSet.name = "Vintage Film";
+    noiseLayer.move(layerSet, ElementPlacement.PLACEATBEGINNING);
+    vignetteLayer.move(layerSet, ElementPlacement.PLACEATBEGINNING);
+    curvesLayer.move(layerSet, ElementPlacement.PLACEATBEGINNING);
+    colorBalanceLayer.move(layerSet, ElementPlacement.PLACEATBEGINNING);
+    vintageLayer.move(layerSet, ElementPlacement.PLACEATBEGINNING);
+    backgroundLayer.move(layerSet, ElementPlacement.PLACEATBEGINNING);
+
+    // Done message
+    alert("Vintage film effect applied!");
+} else {
+    alert("Please open a document before running this script.");
+}
